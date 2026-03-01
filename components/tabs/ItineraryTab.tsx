@@ -183,11 +183,19 @@ export default function ItineraryTab() {
       : 3
 
   async function streamFromAPI(msgs: ChatMessage[], existingItinerary?: ItineraryDay[]): Promise<string> {
+    // Strip JSON/tripsheet blocks from assistant messages before sending — they're already
+    // in the system prompt as existingItinerary/existingTripSheet, so re-sending them in
+    // message history would double the payload and cause timeouts on follow-up turns.
+    const cleanedMsgs = msgs.map((m) =>
+      m.role === 'assistant'
+        ? { ...m, content: displayContent(m.content) || '(itinerary generated)' }
+        : m
+    )
     const res = await fetch('/api/itinerary-chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: msgs,
+        messages: cleanedMsgs,
         contributions: trip!.contributions,
         country: trip!.country,
         tripName: trip!.name,
