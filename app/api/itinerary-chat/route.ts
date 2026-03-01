@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 }
 \`\`\`
 
-Immediately after that JSON block, output a trip sheet summary using this exact format (no prose between the two blocks):
+IMPORTANT: You MUST always output the trip sheet block every time you output an itinerary. Immediately after the itinerary JSON block, with no prose between them, output the trip sheet in this exact format:
 \`\`\`tripsheet
 {
   "tripSheet": [
@@ -85,7 +85,9 @@ Immediately after that JSON block, output a trip sheet summary using this exact 
 }
 \`\`\`
 
-Then end with exactly this sentence on its own line: "I've also drafted a Trip Sheet summary — shall I push it to your Trip Sheet tab?"`
+Then end with exactly this sentence on its own line: "I've also drafted a Trip Sheet summary — shall I push it to your Trip Sheet tab?"
+
+IMPORTANT: If the user's message is simply confirming or acknowledging a push (e.g. "yes", "push it", "go ahead", "looks good", "ok"), respond with one short sentence only (e.g. "Great, pushed!") and do NOT output any JSON blocks.`
 
     const tripSheetContext = existingTripSheet && existingTripSheet.length > 0
       ? `\n\nEXISTING TRIP SHEET:\n${JSON.stringify(existingTripSheet.map(d => ({
@@ -146,7 +148,7 @@ STYLE NOTES:
 
     const stream = await client.messages.stream({
       model: 'claude-sonnet-4-6',
-      max_tokens: 6000,
+      max_tokens: 10000,
       system: systemPrompt,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     })
