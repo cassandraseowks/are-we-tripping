@@ -62,7 +62,29 @@ export async function POST(req: Request) {
     }
   ]
 }
-\`\`\``
+\`\`\`
+
+Immediately after that JSON block, output a trip sheet summary using this exact format (no prose between the two blocks):
+\`\`\`tripsheet
+{
+  "tripSheet": [
+    {
+      "date": "YYYY-MM-DD",
+      "dayOfWeek": "Monday",
+      "city": "City name — use 'City A → City B' only if the group physically travels between cities that day",
+      "activities": [
+        {
+          "title": "Short label e.g. 'Lunch at Ichiran Ramen' or 'TeamLab Planets'",
+          "details": ["Practical tip or note", "another if needed"]
+        }
+      ],
+      "notes": "Any day-level notes, e.g. 'Book tickets in advance'. Empty string if none."
+    }
+  ]
+}
+\`\`\`
+
+Then end with exactly this sentence on its own line: "I've also drafted a Trip Sheet summary — shall I push it to your Trip Sheet tab?"`
 
     const baseContext = `TRIP DETAILS:
 - Trip: ${tripName}

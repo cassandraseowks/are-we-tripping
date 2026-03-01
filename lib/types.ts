@@ -75,6 +75,21 @@ export type BudgetItem = {
   paidBy?: string
 }
 
+export type TripSheetActivity = {
+  title: string
+  details: string[]
+}
+
+export type TripSheetDay = {
+  id: string
+  date?: string
+  dayOfWeek?: string
+  city?: string
+  accommodationId?: string
+  activities: TripSheetActivity[]
+  notes?: string
+}
+
 export type Trip = {
   id: string
   name: string
@@ -86,6 +101,7 @@ export type Trip = {
   contributions: Contribution[]
   itinerary?: ItineraryDay[]
   itineraryUpdatedAt?: number
+  tripSheet?: TripSheetDay[]
   accommodation: Accommodation[]
   flights: FlightInfo[]
   budget: BudgetItem[]

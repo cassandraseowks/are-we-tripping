@@ -11,6 +11,7 @@ import AccommodationTab from '@/components/tabs/AccommodationTab'
 import FoodTab from '@/components/tabs/FoodTab'
 import BudgetTab from '@/components/tabs/BudgetTab'
 import FlightsTab from '@/components/tabs/FlightsTab'
+import TripSheetTab from '@/components/tabs/TripSheetTab'
 
 export default function TripPage() {
   const { trip, currentUser, setCurrentUser, isLoading } = useTrip()
@@ -88,6 +89,7 @@ export default function TripPage() {
         <div className="tab-content" key={activeTab}>
           {activeTab === 'wishlist' && <WishlistTab />}
           {activeTab === 'itinerary' && <ItineraryTab />}
+          {activeTab === 'tripsheet' && <TripSheetTab />}
           {activeTab === 'map' && <MapTab />}
           {activeTab === 'accommodation' && <AccommodationTab />}
           {activeTab === 'food' && <FoodTab />}

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 export type TabId =
   | 'wishlist'
   | 'itinerary'
+  | 'tripsheet'
   | 'map'
   | 'accommodation'
   | 'food'
@@ -14,6 +15,7 @@ export type TabId =
 const TABS: { id: TabId; label: string }[] = [
   { id: 'wishlist', label: 'Wishlist' },
   { id: 'itinerary', label: 'Itinerary' },
+  { id: 'tripsheet', label: 'Trip Sheet' },
   { id: 'map', label: 'Map' },
   { id: 'accommodation', label: 'Stays' },
   { id: 'food', label: 'Food' },
