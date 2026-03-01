@@ -42,8 +42,12 @@ function parseTripSheet(text: string): TripSheetDay[] | null {
 
 function displayContent(content: string): string {
   return content
+    // Strip complete blocks
     .replace(/```json[\s\S]*?```/g, '')
     .replace(/```tripsheet[\s\S]*?```/g, '')
+    // Strip partial/in-progress blocks (no closing ``` yet — happens during streaming)
+    .replace(/```json[\s\S]*/g, '')
+    .replace(/```tripsheet[\s\S]*/g, '')
     .trim()
 }
 
@@ -329,12 +333,20 @@ export default function ItineraryTab() {
   const streamingBubble = isStreaming ? (
     <div className="flex gap-2.5 justify-start">
       <div className="w-7 h-7 rounded-full bg-sand-100 border border-sand-200 flex items-center justify-center text-xs shrink-0 mt-0.5">✦</div>
-      {streamingText ? (
-        <div className="max-w-[82%] bg-stone-50 border border-stone-100 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-stone-800 whitespace-pre-wrap">
-          {displayContent(streamingText)}
-          <span className="inline-block w-1.5 h-3.5 bg-sand-400 rounded-sm ml-0.5 animate-pulse align-middle" />
-        </div>
-      ) : (
+      {streamingText ? (() => {
+        const visible = displayContent(streamingText)
+        return visible ? (
+          <div className="max-w-[82%] bg-stone-50 border border-stone-100 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-stone-800 whitespace-pre-wrap">
+            {visible}
+            <span className="inline-block w-1.5 h-3.5 bg-sand-400 rounded-sm ml-0.5 animate-pulse align-middle" />
+          </div>
+        ) : (
+          <div className="bg-stone-50 border border-stone-100 rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-stone-400 italic">
+            Building your itinerary…
+            <span className="inline-block w-1.5 h-3.5 bg-sand-400 rounded-sm ml-0.5 animate-pulse align-middle" />
+          </div>
+        )
+      })() : (
         <div className="bg-stone-50 border border-stone-100 rounded-2xl rounded-tl-sm px-4 py-3">
           <div className="flex gap-1 items-center h-5">
             {[0, 150, 300].map((delay) => (
