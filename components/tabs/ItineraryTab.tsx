@@ -172,6 +172,7 @@ export default function ItineraryTab() {
         days,
         members: trip!.members,
         existingItinerary,
+        existingTripSheet: trip!.tripSheet,
       }),
     })
     if (!res.ok || !res.body) throw new Error('Stream failed')

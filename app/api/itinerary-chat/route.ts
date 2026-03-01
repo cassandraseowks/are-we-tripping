@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { Contribution, ItineraryDay } from '@/lib/types'
+import type { Contribution, ItineraryDay, TripSheetDay } from '@/lib/types'
 
 const client = new Anthropic()
 
@@ -18,12 +18,13 @@ interface RequestBody {
   days: number
   members: string[]
   existingItinerary?: ItineraryDay[]
+  existingTripSheet?: TripSheetDay[]
 }
 
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as RequestBody
-    const { messages, contributions, country, tripName, startDate, endDate, days, members, existingItinerary } = body
+    const { messages, contributions, country, tripName, startDate, endDate, days, members, existingItinerary, existingTripSheet } = body
 
     const contributionList =
       contributions.length > 0
@@ -86,6 +87,16 @@ Immediately after that JSON block, output a trip sheet summary using this exact 
 
 Then end with exactly this sentence on its own line: "I've also drafted a Trip Sheet summary — shall I push it to your Trip Sheet tab?"`
 
+    const tripSheetContext = existingTripSheet && existingTripSheet.length > 0
+      ? `\n\nEXISTING TRIP SHEET:\n${JSON.stringify(existingTripSheet.map(d => ({
+          date: d.date,
+          dayOfWeek: d.dayOfWeek,
+          city: d.city,
+          activities: d.activities.map(a => ({ title: a.title, details: a.details })),
+          notes: d.notes,
+        })), null, 2)}\n\nYou can reference, update, add to, or clarify any part of this Trip Sheet based on the conversation. If the user asks you to change something specific (e.g. swap a city, add an activity, fill in a blank), output an updated tripsheet JSON block with the FULL sheet (all days, not just changed ones), then ask if they'd like to push the update.`
+      : ''
+
     const baseContext = `TRIP DETAILS:
 - Trip: ${tripName}
 - Destination: ${country}
@@ -93,7 +104,7 @@ Then end with exactly this sentence on its own line: "I've also drafted a Trip S
 - Travellers: ${members.join(', ')} (${members.length} ${members.length === 1 ? 'person' : 'people'})
 
 WISHLIST ITEMS:
-${contributionList}`
+${contributionList}${tripSheetContext}`
 
     const systemPrompt = existingItinerary
       ? `You are an expert travel planner helping a group modify their existing trip itinerary.
