@@ -343,7 +343,7 @@ export default function TripSheetTab() {
           </p>
         </div>
       ) : (
-        <div className="flex gap-4 items-start">
+        <div className="flex gap-4">
           {/* Left nav */}
           <nav className="w-44 shrink-0">
             <div className="sticky top-14 bg-white rounded-2xl border border-stone-100 shadow-sm p-2 space-y-0.5 max-h-[calc(100vh-120px)] overflow-y-auto z-50">
