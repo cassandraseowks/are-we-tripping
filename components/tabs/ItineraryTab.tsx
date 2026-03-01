@@ -26,6 +26,25 @@ function parseItinerary(text: string): ItineraryDay[] | null {
   }
 }
 
+// Parses partial "updates" blocks from modification mode and merges into existing itinerary
+function mergeItineraryUpdates(text: string, existing: ItineraryDay[]): ItineraryDay[] | null {
+  const match = text.match(/```json\s*([\s\S]*?)```/)
+  if (!match) return null
+  try {
+    const parsed = JSON.parse(match[1].trim()) as { updates?: ItineraryDay[] }
+    if (!Array.isArray(parsed.updates) || parsed.updates.length === 0) return null
+    const merged = [...existing]
+    for (const update of parsed.updates) {
+      const idx = merged.findIndex((d) => d.day === update.day)
+      if (idx >= 0) merged[idx] = update
+      else merged.push(update)
+    }
+    return merged.sort((a, b) => a.day - b.day)
+  } catch {
+    return null
+  }
+}
+
 function parseTripSheet(text: string): TripSheetDay[] | null {
   const match = text.match(/```tripsheet\s*([\s\S]*?)```/)
   if (!match) return null
@@ -254,10 +273,9 @@ export default function ItineraryTab() {
     if (modTextareaRef.current) modTextareaRef.current.style.height = 'auto'
     try {
       const fullText = await streamFromAPI(updated, trip!.itinerary)
-      const itinerary = parseItinerary(fullText)
+      // Modification mode outputs only changed days — merge into existing itinerary
+      const itinerary = mergeItineraryUpdates(fullText, trip!.itinerary ?? []) ?? parseItinerary(fullText)
       if (itinerary) updateTrip((prev) => ({ ...prev, itinerary, itineraryUpdatedAt: Date.now() }))
-      const sheet = parseTripSheet(fullText)
-      if (sheet) setPendingTripSheet(sheet)
       setModMessages((prev) => [...prev, { role: 'assistant', content: fullText }])
     } catch {
       setModMessages((prev) => [...prev, { role: 'assistant', content: 'Something went wrong — please try again.' }])

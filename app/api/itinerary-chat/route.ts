@@ -108,22 +108,46 @@ IMPORTANT: If the user's message is simply confirming or acknowledging a push (e
 WISHLIST ITEMS:
 ${contributionList}${tripSheetContext}`
 
+    const modificationJsonFormat = `\`\`\`json
+{
+  "updates": [
+    {
+      "day": 1,
+      "date": "YYYY-MM-DD",
+      "theme": "Short evocative theme for the day",
+      "items": [
+        {
+          "time": "09:00",
+          "name": "Place or activity name",
+          "description": "1–2 sentence description",
+          "type": "food|activity|travel|rest",
+          "contributedBy": [],
+          "tips": "Optional practical tip"
+        }
+      ]
+    }
+  ]
+}
+\`\`\``
+
     const systemPrompt = existingItinerary
       ? `You are an expert travel planner helping a group modify their existing trip itinerary.
 
 ${baseContext}
 
-CURRENT ITINERARY (modify this):
+CURRENT ITINERARY:
 ${JSON.stringify({ itinerary: existingItinerary }, null, 2)}
 
-The user wants a change. Output a brief acknowledgement (1–2 sentences), then the FULL updated itinerary JSON block (all days, not just changed days), then a short closing note (1 sentence).
+The user wants a change. Output ONE sentence acknowledging the change, then a JSON block containing ONLY the day(s) you changed — not all days.
 
-Output the JSON in exactly this format:
-${itineraryJsonFormat}
+Output ONLY the changed day(s) in this format:
+${modificationJsonFormat}
 
-STYLE NOTES:
-- Be brief and direct — the itinerary is the main output.
-- Don't use heavy markdown (no headers with #, no excessive bold).
+RULES:
+- Include ONLY days you actually changed. If you change Day 3, only output Day 3.
+- Each day object must be COMPLETE — include ALL items for that day, not just the new/changed ones.
+- Do NOT output a tripsheet block.
+- If the user is just confirming or acknowledging (e.g. "yes", "ok", "push it"), respond with one short sentence only and no JSON.
 - Dates: if the trip has specific dates, use them. Otherwise omit the "date" field.`
       : `You are a warm, expert travel planner helping a group design their trip itinerary.
 
@@ -148,7 +172,7 @@ STYLE NOTES:
 
     const stream = await client.messages.stream({
       model: 'claude-sonnet-4-6',
-      max_tokens: 10000,
+      max_tokens: existingItinerary ? 3000 : 10000,
       system: systemPrompt,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     })
