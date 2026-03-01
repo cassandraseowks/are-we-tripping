@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, RotateCcw, AlertCircle, TableProperties, Check, X } from 'lucide-react'
+import { Send, RotateCcw, AlertCircle, TableProperties, Check, X, RefreshCw } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useTrip } from '@/context/TripContext'
 import ItineraryDayComponent from '@/components/itinerary/ItineraryDay'
@@ -118,6 +118,26 @@ function TripSheetConfirmCard({
       </div>
     </div>
   )
+}
+
+function dayOfWeekFromDate(dateStr?: string): string {
+  if (!dateStr) return ''
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  return days[new Date(dateStr + 'T12:00:00').getDay()] ?? ''
+}
+
+function deriveTripSheet(itinerary: ItineraryDay[]): TripSheetDay[] {
+  return itinerary.map((day) => ({
+    id: nanoid(),
+    date: day.date,
+    dayOfWeek: dayOfWeekFromDate(day.date),
+    city: undefined,
+    activities: day.items.map((item) => ({
+      title: item.time ? `${item.time} · ${item.name}` : item.name,
+      details: [item.description, item.tips].filter((s): s is string => !!s),
+    })),
+    notes: day.theme,
+  }))
 }
 
 // ── Main component ───────────────────────────────────────────────────────────
@@ -337,10 +357,19 @@ export default function ItineraryTab() {
             </h2>
             <p className="text-sm text-stone-500">Click "Re-plan" to start fresh with AI</p>
           </div>
-          <Button variant="secondary" size="sm" onClick={handleReplan}>
-            <RotateCcw size={13} />
-            Re-plan
-          </Button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPendingTripSheet(deriveTripSheet(trip.itinerary!))}
+              className="flex items-center gap-1.5 text-xs text-stone-500 hover:text-stone-700 border border-stone-200 hover:border-stone-300 bg-white rounded-lg px-3 py-1.5 transition-colors"
+            >
+              <RefreshCw size={11} />
+              Sync Trip Sheet
+            </button>
+            <Button variant="secondary" size="sm" onClick={handleReplan}>
+              <RotateCcw size={13} />
+              Re-plan
+            </Button>
+          </div>
         </div>
 
         {newItems.length > 0 && (
