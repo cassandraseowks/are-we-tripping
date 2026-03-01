@@ -370,12 +370,13 @@ export default function ItineraryTab() {
   if (trip.itinerary) {
     return (
       <div className="space-y-4">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h2 className="font-semibold text-stone-900">
               Your itinerary · {trip.itinerary.length} day{trip.itinerary.length !== 1 ? 's' : ''}
             </h2>
-            <p className="text-sm text-stone-500">Click "Re-plan" to start fresh with AI</p>
+            <p className="text-sm text-stone-500">Chat on the left to modify · Re-plan to start fresh</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -404,48 +405,75 @@ export default function ItineraryTab() {
           </div>
         )}
 
-        <div className="space-y-4">
-          {trip.itinerary.map((day) => (
-            <ItineraryDayComponent key={day.day} day={day} />
-          ))}
-        </div>
+        {/* Two-column layout */}
+        <div className="flex gap-6">
+          {/* Left: Claude chat */}
+          <div className="w-72 shrink-0 sticky top-14 self-start">
+            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm flex flex-col" style={{ height: 'calc(100vh - 110px)' }}>
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100 bg-stone-50/50 rounded-t-2xl">
+                <div className="w-6 h-6 rounded-full bg-sand-100 border border-sand-200 flex items-center justify-center text-xs shrink-0">✦</div>
+                <span className="text-sm font-medium text-stone-700">Ask Claude</span>
+              </div>
 
-        {/* Modification chat */}
-        <div className="border-t border-stone-100 pt-6 space-y-4">
-          <p className="text-sm font-medium text-stone-600">Ask to change anything</p>
-          {(modMessages.length > 0 || isStreaming) && (
-            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-              {modMessages.map((msg, i) => {
-                const text = displayContent(msg.content)
-                const hadItinerary = msg.role === 'assistant' && parseItinerary(msg.content) !== null
-                return (
-                  <div key={i} className={cn('flex gap-2.5', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                    {msg.role === 'assistant' && (
-                      <div className="w-6 h-6 rounded-full bg-sand-100 border border-sand-200 flex items-center justify-center text-xs shrink-0 mt-0.5">✦</div>
-                    )}
-                    <div className={cn('max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed', msg.role === 'user' ? 'bg-stone-900 text-white rounded-tr-sm' : 'bg-stone-50 text-stone-800 border border-stone-100 rounded-tl-sm whitespace-pre-wrap')}>
-                      {text}
-                      {hadItinerary && (
-                        <div className="mt-2 pt-2 border-t border-stone-200 text-xs text-sand-600 font-medium">Itinerary updated — see above ↑</div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {modMessages.length === 0 && !isStreaming && (
+                  <p className="text-xs text-stone-400 text-center pt-6 leading-relaxed">
+                    Ask Claude to swap days, add activities, change the pace, or anything else.
+                  </p>
+                )}
+                {modMessages.map((msg, i) => {
+                  const text = displayContent(msg.content)
+                  const hadItinerary = msg.role === 'assistant' && parseItinerary(msg.content) !== null
+                  return (
+                    <div key={i} className={cn('flex gap-2', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                      {msg.role === 'assistant' && (
+                        <div className="w-5 h-5 rounded-full bg-sand-100 border border-sand-200 flex items-center justify-center text-[10px] shrink-0 mt-0.5">✦</div>
                       )}
+                      <div className={cn('max-w-[85%] rounded-2xl px-3 py-2 text-xs leading-relaxed', msg.role === 'user' ? 'bg-stone-900 text-white rounded-tr-sm' : 'bg-stone-50 text-stone-800 border border-stone-100 rounded-tl-sm whitespace-pre-wrap')}>
+                        {text}
+                        {hadItinerary && (
+                          <div className="mt-1.5 pt-1.5 border-t border-stone-200 text-[10px] text-sand-600 font-medium">Itinerary updated →</div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-              {isStreaming && streamingBubble}
-              <div ref={modMessagesEndRef} />
-            </div>
-          )}
-          <form onSubmit={handleModSubmit} className="flex gap-2 items-end">
-            <textarea ref={modTextareaRef} value={modInputValue} onChange={handleModTextareaChange} onKeyDown={handleModKeyDown} placeholder={isStreaming ? 'Claude is thinking…' : 'Ask to change anything…'} rows={1} disabled={isStreaming} className="flex-1 border border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sand-400 placeholder-stone-300 resize-none disabled:opacity-40 transition-opacity" style={{ maxHeight: '120px' }} />
-            <Button type="submit" disabled={!modInputValue.trim() || isStreaming} size="md" className="shrink-0 self-end"><Send size={14} /></Button>
-          </form>
-          <p className="text-xs text-stone-400 text-center">Enter to send · Shift+Enter for new line</p>
-        </div>
+                  )
+                })}
+                {isStreaming && streamingBubble}
+                <div ref={modMessagesEndRef} />
+              </div>
 
-        {pendingTripSheet && (
-          <TripSheetConfirmCard days={pendingTripSheet} onConfirm={confirmTripSheet} onDismiss={() => setPendingTripSheet(null)} />
-        )}
+              <div className="border-t border-stone-100 px-3 py-3">
+                <form onSubmit={handleModSubmit} className="flex gap-2 items-end">
+                  <textarea
+                    ref={modTextareaRef}
+                    value={modInputValue}
+                    onChange={handleModTextareaChange}
+                    onKeyDown={handleModKeyDown}
+                    placeholder={isStreaming ? 'Claude is thinking…' : 'Ask to change anything…'}
+                    rows={1}
+                    disabled={isStreaming}
+                    className="flex-1 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-sand-400 placeholder-stone-300 resize-none disabled:opacity-40 transition-opacity"
+                    style={{ maxHeight: '100px' }}
+                  />
+                  <Button type="submit" disabled={!modInputValue.trim() || isStreaming} size="md" className="shrink-0 self-end">
+                    <Send size={13} />
+                  </Button>
+                </form>
+                <p className="text-[10px] text-stone-400 mt-1.5 text-center">Enter to send · Shift+Enter for new line</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: itinerary */}
+          <div className="flex-1 min-w-0 space-y-4">
+            {pendingTripSheet && (
+              <TripSheetConfirmCard days={pendingTripSheet} onConfirm={confirmTripSheet} onDismiss={() => setPendingTripSheet(null)} />
+            )}
+            {trip.itinerary.map((day) => (
+              <ItineraryDayComponent key={day.day} day={day} />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

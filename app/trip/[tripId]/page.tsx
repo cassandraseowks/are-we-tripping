@@ -85,7 +85,7 @@ export default function TripPage() {
       <TripHeader />
       <TripTabs active={activeTab} onChange={setActiveTab} />
 
-      <main className={activeTab === 'tripsheet' ? 'px-6 py-8' : 'max-w-5xl mx-auto px-6 py-8'}>
+      <main className={(activeTab === 'tripsheet' || activeTab === 'itinerary') ? 'px-6 py-8' : 'max-w-5xl mx-auto px-6 py-8'}>
         <div className="tab-content" key={activeTab}>
           {activeTab === 'wishlist' && <WishlistTab />}
           {activeTab === 'itinerary' && <ItineraryTab />}
