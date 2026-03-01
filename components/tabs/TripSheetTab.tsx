@@ -343,14 +343,23 @@ export default function TripSheetTab() {
       ) : (
         <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
+            <table className="w-full min-w-[900px] table-fixed">
+              <colgroup>
+                <col className="w-24" />
+                <col className="w-24" />
+                <col className="w-32" />
+                <col className="w-36" />
+                <col />
+                <col className="w-40" />
+                <col className="w-8" />
+              </colgroup>
               <thead>
                 <tr>
                   <th className={thCls}>Date</th>
                   <th className={thCls}>Day</th>
                   <th className={thCls}>City</th>
                   <th className={thCls}>Accommodation</th>
-                  <th className={thCls + ' w-full'}>Activities</th>
+                  <th className={thCls}>Activities</th>
                   <th className={thCls}>Notes</th>
                   <th className={thCls}></th>
                 </tr>
@@ -399,7 +408,7 @@ export default function TripSheetTab() {
                         {day.activities.length === 0 ? (
                           <span className="text-stone-300">—</span>
                         ) : (
-                          <ul className="space-y-1">
+                          <ul className="space-y-1.5">
                             {day.activities.map((act, i) => (
                               <li key={i}>
                                 <span className="text-stone-700">• {act.title}</span>
@@ -417,7 +426,7 @@ export default function TripSheetTab() {
                       </td>
 
                       {/* Notes */}
-                      <td className={tdCls + ' text-stone-500 text-xs max-w-[140px]'}>
+                      <td className={tdCls + ' text-stone-500 text-xs'}>
                         {day.notes ? (
                           <span className="line-clamp-3">{day.notes}</span>
                         ) : (
