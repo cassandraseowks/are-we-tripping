@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Plus, X, ChevronRight, Trash2 } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useTrip } from '@/context/TripContext'
+import { cn } from '@/lib/utils'
 import type { TripSheetDay, TripSheetActivity, Accommodation } from '@/lib/types'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -285,6 +286,7 @@ function SidePanel({
 export default function TripSheetTab() {
   const { trip, updateTrip } = useTrip()
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [activeNavId, setActiveNavId] = useState<string | null>(null)
 
   if (!trip) return null
 
@@ -341,7 +343,38 @@ export default function TripSheetTab() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+        <div className="flex gap-4 items-start">
+          {/* Left nav */}
+          <nav className="w-44 shrink-0">
+            <div className="sticky top-14 bg-white rounded-2xl border border-stone-100 shadow-sm p-2 space-y-0.5 max-h-[calc(100vh-120px)] overflow-y-auto">
+              <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider px-3 pt-1 pb-2">Days</p>
+              {sheet.map((day) => (
+                <button
+                  key={day.id}
+                  onClick={() => {
+                    setActiveNavId(day.id)
+                    document.getElementById(`row-${day.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  }}
+                  className={cn(
+                    'w-full text-left px-3 py-2 rounded-xl text-xs transition-colors',
+                    activeNavId === day.id
+                      ? 'bg-stone-900 text-white'
+                      : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                  )}
+                >
+                  <div className="font-medium">{formatDisplayDate(day.date)}</div>
+                  {(day.city || day.dayOfWeek) && (
+                    <div className={cn('truncate mt-0.5', activeNavId === day.id ? 'text-stone-300' : 'text-stone-400')}>
+                      {day.city ?? day.dayOfWeek}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          {/* Table */}
+          <div className="flex-1 min-w-0 bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] table-fixed">
               <colgroup>
@@ -376,6 +409,7 @@ export default function TripSheetTab() {
                   return (
                     <tr
                       key={day.id}
+                      id={`row-${day.id}`}
                       onClick={() => setSelectedId(day.id)}
                       className="border-t border-stone-50 hover:bg-stone-50/60 cursor-pointer transition-colors group"
                     >
@@ -443,6 +477,7 @@ export default function TripSheetTab() {
                 })}
               </tbody>
             </table>
+          </div>
           </div>
         </div>
       )}

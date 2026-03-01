@@ -163,11 +163,11 @@ export default function ItineraryTab() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, streamingText])
+  }, [messages])
 
   useEffect(() => {
     modMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [modMessages, streamingText])
+  }, [modMessages])
 
   if (!trip) return null
 
